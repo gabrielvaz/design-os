@@ -1,4 +1,4 @@
-import { Share2, Flame, PlayCircle, Mic, ArrowRight, Calendar } from 'lucide-react'
+import { Share2, Flame, PlayCircle, Mic, ArrowRight, Calendar, Sparkles } from 'lucide-react'
 import type { FeedViewProps } from '@/../product/sections/feed-devocional/types'
 import { cn } from '@/lib/utils'
 

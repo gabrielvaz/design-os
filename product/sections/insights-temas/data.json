@@ -1,0 +1,36 @@
+{
+  "_meta": {
+    "models": {
+      "stats": "Estatísticas gerais de uso do aplicativo.",
+      "topics": "Temas identificados pela IA nas gravações do usuário.",
+      "speakers": "Ranking de pregadores mais ouvidos.",
+      "topVerses": "Versículos que mais apareceram nas notas."
+    },
+    "relationships": []
+  },
+  "stats": {
+    "totalHours": 128,
+    "totalNotes": 45,
+    "sermonsCount": 32,
+    "prayersCount": 13,
+    "currentStreak": 12
+  },
+  "topics": [
+    { "name": "Fé", "count": 18, "color": "bg-indigo-500" },
+    { "name": "Família", "count": 12, "color": "bg-sky-500" },
+    { "name": "Gratidão", "count": 10, "color": "bg-emerald-500" },
+    { "name": "Ansiedade", "count": 8, "color": "bg-amber-500" },
+    { "name": "Propósito", "count": 7, "color": "bg-violet-500" },
+    { "name": "Graça", "count": 5, "color": "bg-rose-500" }
+  ],
+  "speakers": [
+    { "name": "Pr. Carlos Andrade", "count": 15 },
+    { "name": "Pr. Lucas Martins", "count": 8 },
+    { "name": "Miss. Fernanda Costa", "count": 4 }
+  ],
+  "topVerses": [
+    { "reference": "Filipenses 4:13", "count": 6 },
+    { "reference": "Salmos 23:1", "count": 4 },
+    { "reference": "João 3:16", "count": 3 }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "_meta": {
+    "models": {
+      "note": "Uma gravação completa com metadados."
+    },
+    "relationships": []
+  },
+  "notes": [
+    {
+      "id": "1",
+      "title": "Vencendo a Ansiedade pela Fé",
+      "date": "02 Jan 2026",
+      "preview": "Uma análise profunda de Filipenses 4, ensinando como trocar a preocupação pela adoração...",
+      "duration": "45:00",
+      "speaker": "Pr. Carlos Andrade",
+      "type": "sermon",
+      "tags": ["Fé", "Ansiedade", "Paz"]
+    },
+    {
+      "id": "2",
+      "title": "Oração de Gratidão - Virada de Ano",
+      "date": "01 Jan 2026",
+      "preview": "Momentos de agradecimento pelas bençãos de 2025 e consagração de 2026...",
+      "duration": "15:30",
+      "speaker": "Eu",
+      "type": "prayer",
+      "tags": ["Gratidão", "Ano Novo"]
+    },
+    {
+      "id": "3",
+      "title": "A Parábola do Filho Pródigo",
+      "date": "28 Dez 2025",
+      "preview": "Entendendo a graça escandalosa de Deus através da história mais famosa de Jesus...",
+      "duration": "52:10",
+      "speaker": "Pr. Lucas Martins",
+      "type": "sermon",
+      "tags": ["Graça", "Perdão", "Parábolas"]
+    },
+    {
+      "id": "4",
+      "title": "Estudo de Célula - Romanos 8",
+      "date": "25 Dez 2025",
+      "preview": "Discussão em grupo sobre o capítulo 8 de Romanos. Nenhuma condenação há...",
+      "duration": "1:10:00",
+      "speaker": "Grupo Jovem",
+      "type": "sermon",
+      "tags": ["Estudo", "Romanos"]
+    },
+    {
+      "id": "5",
+      "title": "Oração pela Família",
+      "date": "20 Dez 2025",
+      "preview": "Intercessão pela saúde da tia Maria e emprego do João...",
+      "duration": "08:45",
+      "speaker": "Eu",
+      "type": "prayer",
+      "tags": ["Família", "Intercessão"]
+    }
+  ]
+}

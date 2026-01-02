@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "models": {
+      "recordingState": "O estado atual da interface de gravação."
+    },
+    "relationships": []
+  },
+  "recordingState": {
+    "status": "recording",
+    "duration": "00:15:24",
+    "type": "sermon",
+    "audioLevel": 65
+  }
+}
