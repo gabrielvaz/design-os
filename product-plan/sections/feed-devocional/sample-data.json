@@ -1,0 +1,39 @@
+{
+  "userProfile": {
+    "name": "Gabriel",
+    "streak": 12,
+    "lastActive": "Hoje"
+  },
+  "dailyVerse": {
+    "reference": "Filipenses 4:6-7",
+    "text": "Não andem ansiosos por coisa alguma, mas em tudo, pela oração e súplicas, e com ação de graças, apresentem seus pedidos a Deus. E a paz de Deus, que excede todo o entendimento, guardará os seus corações e as suas mentes em Cristo Jesus.",
+    "theme": "Ansiedade",
+    "imageColor": "from-indigo-500 to-sky-500"
+  },
+  "recentNotes": [
+    {
+      "id": "note-1",
+      "title": "Culto de Domingo - Manhã",
+      "date": "2 de Jan, 2026",
+      "preview": "Sermão sobre a importância da fé inabalável em tempos de crise...",
+      "duration": "45:12",
+      "type": "sermon"
+    },
+    {
+      "id": "note-2",
+      "title": "Oração da Manhã",
+      "date": "1 de Jan, 2026",
+      "preview": "Gratidão pelo ano novo que se inicia e pedidos de sabedoria...",
+      "duration": "12:05",
+      "type": "prayer"
+    },
+    {
+      "id": "note-3",
+      "title": "Estudo de Célula",
+      "date": "28 de Dez, 2025",
+      "preview": "Discussão sobre o livro de Romanos, capítulo 8...",
+      "duration": "1:15:00",
+      "type": "sermon"
+    }
+  ]
+}
