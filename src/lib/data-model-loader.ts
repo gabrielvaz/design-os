@@ -5,7 +5,7 @@
 import type { DataModel, Entity } from '@/types/product'
 
 // Load data model markdown file at build time
-const dataModelFiles = import.meta.glob('/product/data-model/*.md', {
+const dataModelFiles = import.meta.glob('/projects/*/data-model/*.md', {
   query: '?raw',
   import: 'default',
   eager: true,
@@ -13,22 +13,6 @@ const dataModelFiles = import.meta.glob('/product/data-model/*.md', {
 
 /**
  * Parse data-model.md content into DataModel structure
- *
- * Expected format:
- * # Data Model
- *
- * ## Entities
- *
- * ### EntityName
- * Description of what this entity represents.
- *
- * ### AnotherEntity
- * Description of this entity.
- *
- * ## Relationships
- *
- * - Entity has many OtherEntity
- * - OtherEntity belongs to Entity
  */
 export function parseDataModel(md: string): DataModel | null {
   if (!md || !md.trim()) return null
@@ -78,14 +62,14 @@ export function parseDataModel(md: string): DataModel | null {
 /**
  * Load the data model from markdown file
  */
-export function loadDataModel(): DataModel | null {
-  const content = dataModelFiles['/product/data-model/data-model.md']
+export function loadDataModel(projectId: string): DataModel | null {
+  const content = dataModelFiles[`/projects/${projectId}/data-model/data-model.md`]
   return content ? parseDataModel(content) : null
 }
 
 /**
  * Check if data model has been defined
  */
-export function hasDataModel(): boolean {
-  return '/product/data-model/data-model.md' in dataModelFiles
+export function hasDataModel(projectId: string): boolean {
+  return `/projects/${projectId}/data-model/data-model.md` in dataModelFiles
 }

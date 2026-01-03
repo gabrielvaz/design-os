@@ -1,5 +1,5 @@
 import { Suspense, useMemo, useState, useRef, useCallback, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, PanelLeft, Maximize2, GripVertical, Smartphone, Tablet, Monitor } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -10,6 +10,7 @@ const MIN_WIDTH = 320
 const DEFAULT_WIDTH_PERCENT = 100
 
 export function ShellDesignPage() {
+  const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
   const [widthPercent, setWidthPercent] = useState(DEFAULT_WIDTH_PERCENT)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -56,6 +57,8 @@ export function ShellDesignPage() {
 
   const previewWidth = `${widthPercent}%`
 
+  if (!projectId) return null
+
   return (
     <div className="h-screen bg-stone-100 dark:bg-stone-900 animate-fade-in flex flex-col overflow-hidden">
       {/* Header */}
@@ -64,7 +67,7 @@ export function ShellDesignPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/design')}
+            onClick={() => navigate(`/${projectId}/design`)}
             className="text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 -ml-2"
           >
             <ArrowLeft className="w-4 h-4 mr-2" strokeWidth={1.5} />
@@ -121,7 +124,7 @@ export function ShellDesignPage() {
             </span>
             <ThemeToggle />
             <a
-              href="/shell/design/fullscreen"
+              href={`/${projectId}/shell/design/fullscreen`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 transition-colors"
@@ -154,7 +157,7 @@ export function ShellDesignPage() {
           style={{ width: previewWidth, minWidth: MIN_WIDTH, maxWidth: '100%' }}
         >
           <iframe
-            src="/shell/design/fullscreen"
+            src={`/${projectId}/shell/design/fullscreen`}
             className="w-full h-full border-0"
             title="Shell Preview"
           />
@@ -179,7 +182,8 @@ export function ShellDesignPage() {
  * Syncs theme with parent window via localStorage
  */
 export function ShellDesignFullscreen() {
-  const shellPreviewLoader = loadShellPreview()
+  const { projectId } = useParams<{ projectId: string }>()
+  const shellPreviewLoader = useMemo(() => projectId ? loadShellPreview(projectId) : null, [projectId])
 
   const ShellPreviewComponent = useMemo(() => {
     if (!shellPreviewLoader) return null
@@ -220,7 +224,7 @@ export function ShellDesignFullscreen() {
     }
   }, [])
 
-  if (!ShellPreviewComponent) {
+  if (!projectId || !ShellPreviewComponent) {
     return (
       <div className="h-screen flex items-center justify-center bg-background">
         <p className="text-stone-600 dark:text-stone-400">Shell preview not found.</p>

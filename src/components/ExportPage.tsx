@@ -1,24 +1,30 @@
 import { useMemo } from 'react'
-import { Check, AlertTriangle, FileText, FolderTree, ChevronDown, Download, Package } from 'lucide-react'
+import { useParams } from 'react-router-dom'
+import { Check, AlertTriangle, FileText, FolderTree, ChevronDown, Download, Package, FileCode } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { AppLayout } from '@/components/AppLayout'
-import { loadProductData, hasExportZip, getExportZipUrl } from '@/lib/product-loader'
+import { loadProjectData, hasExportZip, getExportZipUrl, getProjectFiles } from '@/lib/product-loader'
 import { getAllSectionIds, getSectionScreenDesigns } from '@/lib/section-loader'
 
 export function ExportPage() {
-  const productData = useMemo(() => loadProductData(), [])
+  const { projectId } = useParams<{ projectId: string }>()
+  const productData = useMemo(() => loadProjectData(projectId || ''), [projectId])
+
+  // Get project files for individual download
+  const projectFiles = useMemo(() => projectId ? getProjectFiles(projectId) : [], [projectId])
 
   // Get section stats
   const sectionStats = useMemo(() => {
-    const allSectionIds = getAllSectionIds()
+    if (!projectId) return { sectionCount: 0, sectionsWithScreenDesigns: 0, allSectionIds: [] }
+    const allSectionIds = getAllSectionIds(projectId)
     const sectionCount = productData.roadmap?.sections.length || 0
     const sectionsWithScreenDesigns = allSectionIds.filter(id => {
       const screenDesigns = getSectionScreenDesigns(id)
       return screenDesigns.length > 0
     }).length
     return { sectionCount, sectionsWithScreenDesigns, allSectionIds }
-  }, [productData.roadmap])
+  }, [productData.roadmap, projectId])
 
   const hasOverview = !!productData.overview
   const hasRoadmap = !!productData.roadmap
@@ -30,8 +36,10 @@ export function ExportPage() {
   const requiredComplete = hasOverview && hasRoadmap && hasSections
 
   // Check for export zip
-  const exportZipAvailable = hasExportZip()
-  const exportZipUrl = getExportZipUrl()
+  const exportZipAvailable = projectId ? hasExportZip(projectId) : false
+  const exportZipUrl = projectId ? getExportZipUrl(projectId) : null
+
+  if (!projectId) return null
 
   return (
     <AppLayout>
@@ -86,7 +94,7 @@ export function ExportPage() {
           </Card>
         )}
 
-        {/* Export command */}
+        {/* Export command & Zip download */}
         {requiredComplete && (
           <Card className="border-stone-200 dark:border-stone-700 shadow-sm">
             <CardHeader>
@@ -182,6 +190,45 @@ export function ExportPage() {
                     items={['tests.md per section', 'User flow tests', 'Empty state tests']}
                   />
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Individual Files download */}
+        {projectFiles.length > 0 && (
+          <Card className="border-stone-200 dark:border-stone-700 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-semibold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                <FileCode className="w-5 h-5 text-stone-500 dark:text-stone-400" strokeWidth={1.5} />
+                Project Files
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {projectFiles.map((file) => (
+                  <div key={file.path} className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-800 last:border-0 hover:bg-stone-50 dark:hover:bg-stone-800/50 px-2 rounded-md transition-colors">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <FileText className="w-4 h-4 text-stone-400 shrink-0" strokeWidth={1.5} />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-stone-700 dark:text-stone-300 truncate">
+                          {file.name}
+                        </p>
+                        <p className="text-[10px] text-stone-500 dark:text-stone-500 uppercase tracking-tight">
+                          {file.path.split('/').slice(0, -1).join(' / ')}
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href={file.url}
+                      download={file.name}
+                      className="p-1.5 rounded-md text-stone-400 hover:text-stone-600 dark:text-stone-500 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors shrink-0"
+                      title={`Download ${file.name}`}
+                    >
+                      <Download className="w-4 h-4" strokeWidth={1.5} />
+                    </a>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

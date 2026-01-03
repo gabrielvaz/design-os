@@ -10,15 +10,15 @@
 import type { SectionData, ParsedSpec, ScreenDesignInfo, ScreenshotInfo } from '@/types/section'
 import type { ComponentType } from 'react'
 
-// Load spec.md files from product/sections at build time
-const specFiles = import.meta.glob('/product/sections/*/spec.md', {
+// Load spec.md files from projects/*/sections at build time
+const specFiles = import.meta.glob('/projects/*/sections/*/spec.md', {
   query: '?raw',
   import: 'default',
   eager: true,
 }) as Record<string, string>
 
-// Load data.json files from product/sections at build time
-const dataFiles = import.meta.glob('/product/sections/*/data.json', {
+// Load data.json files from projects/*/sections at build time
+const dataFiles = import.meta.glob('/projects/*/sections/*/data.json', {
   eager: true,
 }) as Record<string, { default: Record<string, unknown> }>
 
@@ -28,19 +28,19 @@ const screenDesignModules = import.meta.glob('/src/sections/*/*.tsx') as Record<
   () => Promise<{ default: ComponentType }>
 >
 
-// Load screenshot files from product/sections at build time
-const screenshotFiles = import.meta.glob('/product/sections/*/*.png', {
+// Load screenshot files from projects/*/sections at build time
+const screenshotFiles = import.meta.glob('/projects/*/sections/*/*.png', {
   query: '?url',
   import: 'default',
   eager: true,
 }) as Record<string, string>
 
 /**
- * Extract section ID from a product/sections file path
- * e.g., "/product/sections/invoices/spec.md" -> "invoices"
+ * Extract section ID from a project's sections file path
+ * e.g., "/projects/bible-notes/sections/invoices/spec.md" -> "invoices"
  */
-function extractSectionIdFromProduct(path: string): string | null {
-  const match = path.match(/\/product\/sections\/([^/]+)\//)
+function extractSectionIdFromPath(path: string): string | null {
+  const match = path.match(/\/projects\/[^/]+\/sections\/([^/]+)\//)
   return match?.[1] || null
 }
 
@@ -64,10 +64,10 @@ function extractScreenDesignName(path: string): string | null {
 
 /**
  * Extract screenshot name from a file path
- * e.g., "/product/sections/invoices/invoice-list.png" -> "invoice-list"
+ * e.g., "/projects/bible-notes/sections/invoices/invoice-list.png" -> "invoice-list"
  */
 function extractScreenshotName(path: string): string | null {
-  const match = path.match(/\/product\/sections\/[^/]+\/([^/]+)\.png$/)
+  const match = path.match(/\/projects\/[^/]+\/sections\/[^/]+\/([^/]+)\.png$/)
   return match?.[1] || null
 }
 
@@ -168,9 +168,9 @@ export function getSectionScreenDesigns(sectionId: string): ScreenDesignInfo[] {
 /**
  * Get screenshots for a specific section
  */
-export function getSectionScreenshots(sectionId: string): ScreenshotInfo[] {
+export function getSectionScreenshots(projectId: string, sectionId: string): ScreenshotInfo[] {
   const screenshots: ScreenshotInfo[] = []
-  const prefix = `/product/sections/${sectionId}/`
+  const prefix = `/projects/${projectId}/sections/${sectionId}/`
 
   for (const [path, url] of Object.entries(screenshotFiles)) {
     if (path.startsWith(prefix)) {
@@ -202,9 +202,9 @@ export function loadScreenDesignComponent(
 /**
  * Load all data for a specific section
  */
-export function loadSectionData(sectionId: string): SectionData {
-  const specPath = `/product/sections/${sectionId}/spec.md`
-  const dataPath = `/product/sections/${sectionId}/data.json`
+export function loadSectionData(projectId: string, sectionId: string): SectionData {
+  const specPath = `/projects/${projectId}/sections/${sectionId}/spec.md`
+  const dataPath = `/projects/${projectId}/sections/${sectionId}/data.json`
 
   const specContent = specFiles[specPath] || null
   const dataModule = dataFiles[dataPath]
@@ -216,23 +216,23 @@ export function loadSectionData(sectionId: string): SectionData {
     specParsed: specContent ? parseSpec(specContent) : null,
     data,
     screenDesigns: getSectionScreenDesigns(sectionId),
-    screenshots: getSectionScreenshots(sectionId),
+    screenshots: getSectionScreenshots(projectId, sectionId),
   }
 }
 
 /**
  * Check if a section has a spec.md file
  */
-export function hasSectionSpec(sectionId: string): boolean {
-  return `/product/sections/${sectionId}/spec.md` in specFiles
+export function hasSectionSpec(projectId: string, sectionId: string): boolean {
+  return `/projects/${projectId}/sections/${sectionId}/spec.md` in specFiles
 }
 
 /**
  * Check if a section's screen designs should use the app shell
  * Returns true by default, false if spec contains "shell: false"
  */
-export function sectionUsesShell(sectionId: string): boolean {
-  const specPath = `/product/sections/${sectionId}/spec.md`
+export function sectionUsesShell(projectId: string, sectionId: string): boolean {
+  const specPath = `/projects/${projectId}/sections/${sectionId}/spec.md`
   const specContent = specFiles[specPath]
   if (!specContent) return true // Default to using shell if no spec
 
@@ -243,24 +243,29 @@ export function sectionUsesShell(sectionId: string): boolean {
 /**
  * Check if a section has a data.json file
  */
-export function hasSectionData(sectionId: string): boolean {
-  return `/product/sections/${sectionId}/data.json` in dataFiles
+export function hasSectionData(projectId: string, sectionId: string): boolean {
+  return `/projects/${projectId}/sections/${sectionId}/data.json` in dataFiles
 }
 
 /**
  * Get all section IDs that have any artifacts
  */
-export function getAllSectionIds(): string[] {
+export function getAllSectionIds(projectId: string): string[] {
   const ids = new Set<string>()
+  const prefix = `/projects/${projectId}/sections/`
 
   for (const path of Object.keys(specFiles)) {
-    const id = extractSectionIdFromProduct(path)
-    if (id) ids.add(id)
+    if (path.startsWith(prefix)) {
+      const id = extractSectionIdFromPath(path)
+      if (id) ids.add(id)
+    }
   }
 
   for (const path of Object.keys(dataFiles)) {
-    const id = extractSectionIdFromProduct(path)
-    if (id) ids.add(id)
+    if (path.startsWith(prefix)) {
+      const id = extractSectionIdFromPath(path)
+      if (id) ids.add(id)
+    }
   }
 
   for (const path of Object.keys(screenDesignModules)) {

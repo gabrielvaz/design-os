@@ -1,7 +1,7 @@
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useMemo } from 'react'
 import { FileText, Boxes, Layout, LayoutList, Package } from 'lucide-react'
-import { loadProductData, hasExportZip } from '@/lib/product-loader'
+import { loadProjectData, hasExportZip } from '@/lib/product-loader'
 import { getAllSectionIds, getSectionScreenDesigns } from '@/lib/section-loader'
 
 export type Phase = 'product' | 'data-model' | 'design' | 'sections' | 'export'
@@ -10,15 +10,15 @@ interface PhaseConfig {
   id: Phase
   label: string
   icon: typeof FileText
-  path: string
+  path: (projectId: string) => string
 }
 
 const phases: PhaseConfig[] = [
-  { id: 'product', label: 'Product', icon: FileText, path: '/' },
-  { id: 'data-model', label: 'Data Model', icon: Boxes, path: '/data-model' },
-  { id: 'design', label: 'Design', icon: Layout, path: '/design' },
-  { id: 'sections', label: 'Sections', icon: LayoutList, path: '/sections' },
-  { id: 'export', label: 'Export', icon: Package, path: '/export' },
+  { id: 'product', label: 'Product', icon: FileText, path: (pid) => `/${pid}` },
+  { id: 'data-model', label: 'Data Model', icon: Boxes, path: (pid) => `/${pid}/data-model` },
+  { id: 'design', label: 'Design', icon: Layout, path: (pid) => `/${pid}/design` },
+  { id: 'sections', label: 'Sections', icon: LayoutList, path: (pid) => `/${pid}/sections` },
+  { id: 'export', label: 'Export', icon: Package, path: (pid) => `/${pid}/export` },
 ]
 
 export type PhaseStatus = 'completed' | 'current' | 'upcoming'
@@ -31,7 +31,8 @@ interface PhaseInfo {
 
 function usePhaseStatuses(): PhaseInfo[] {
   const location = useLocation()
-  const productData = useMemo(() => loadProductData(), [])
+  const { projectId } = useParams()
+  const productData = useMemo(() => loadProjectData(projectId || ''), [projectId])
 
   // Calculate completion status for each phase
   const hasOverview = !!productData.overview
@@ -40,7 +41,7 @@ function usePhaseStatuses(): PhaseInfo[] {
   const hasDesignSystem = !!productData.designSystem
   const hasShell = !!productData.shell
 
-  const sectionIds = useMemo(() => getAllSectionIds(), [])
+  const sectionIds = useMemo(() => getAllSectionIds(projectId || ''), [projectId])
   const sectionsWithScreenDesigns = useMemo(() => {
     return sectionIds.filter(id => getSectionScreenDesigns(id).length > 0).length
   }, [sectionIds])
@@ -50,20 +51,21 @@ function usePhaseStatuses(): PhaseInfo[] {
   const currentPath = location.pathname
   let currentPhaseId: Phase = 'product'
 
-  if (currentPath === '/' || currentPath === '/product') {
+  const base = `/${projectId}`
+  if (currentPath === base || currentPath === `${base}/product`) {
     currentPhaseId = 'product'
-  } else if (currentPath === '/data-model') {
+  } else if (currentPath === `${base}/data-model`) {
     currentPhaseId = 'data-model'
-  } else if (currentPath === '/design' || currentPath === '/design-system' || currentPath.startsWith('/shell')) {
+  } else if (currentPath === `${base}/design` || currentPath === `${base}/design-system` || currentPath.startsWith(`${base}/shell`)) {
     currentPhaseId = 'design'
-  } else if (currentPath === '/sections' || currentPath.startsWith('/sections/')) {
+  } else if (currentPath === `${base}/sections` || currentPath.startsWith(`${base}/sections/`)) {
     currentPhaseId = 'sections'
-  } else if (currentPath === '/export') {
+  } else if (currentPath === `${base}/export`) {
     currentPhaseId = 'export'
   }
 
   // Check if export zip exists
-  const exportZipExists = hasExportZip()
+  const exportZipExists = hasExportZip(projectId || '')
 
   // Determine completion status
   const phaseComplete: Record<Phase, boolean> = {
@@ -89,8 +91,11 @@ function usePhaseStatuses(): PhaseInfo[] {
 }
 
 export function PhaseNav() {
+  const { projectId } = useParams()
   const navigate = useNavigate()
   const phaseInfos = usePhaseStatuses()
+
+  if (!projectId) return null
 
   return (
     <nav className="flex items-center justify-center">
@@ -113,7 +118,7 @@ export function PhaseNav() {
 
             {/* Phase button */}
             <button
-              onClick={() => navigate(phase.path)}
+              onClick={() => navigate(phase.path(projectId))}
               className={`
                 group relative flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-all duration-200 whitespace-nowrap
                 ${status === 'current'
@@ -136,7 +141,7 @@ export function PhaseNav() {
                 {phase.label}
               </span>
 
-              {/* Completion indicator - check circle at top-left (shows even when current) */}
+              {/* Completion indicator */}
               {isComplete && (
                 <span className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-lime-500 flex items-center justify-center shadow-sm">
                   <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>

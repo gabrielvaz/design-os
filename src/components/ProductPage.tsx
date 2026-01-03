@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { loadProductData } from '@/lib/product-loader'
+import { useNavigate, useParams } from 'react-router-dom'
+import { loadProjectData } from '@/lib/product-loader'
 import { AppLayout } from '@/components/AppLayout'
 import { EmptyState } from '@/components/EmptyState'
 import { ProductOverviewCard } from '@/components/ProductOverviewCard'
@@ -39,13 +39,16 @@ function getProductPageStepStatuses(
 
 export function ProductPage() {
   const navigate = useNavigate()
-  const productData = useMemo(() => loadProductData(), [])
+  const { projectId } = useParams()
+  const productData = useMemo(() => loadProjectData(projectId || ''), [projectId])
 
   const hasOverview = !!productData.overview
   const hasRoadmap = !!productData.roadmap
   const allStepsComplete = hasOverview && hasRoadmap
 
   const stepStatuses = getProductPageStepStatuses(hasOverview, hasRoadmap)
+
+  if (!projectId) return null
 
   return (
     <AppLayout>
@@ -77,7 +80,7 @@ export function ProductPage() {
             {productData.roadmap ? (
               <SectionsCard
                 roadmap={productData.roadmap}
-                onSectionClick={(sectionId) => navigate(`/sections/${sectionId}`)}
+                onSectionClick={(sectionId) => navigate(`/${projectId}/sections/${sectionId}`)}
               />
             ) : (
               <EmptyState type="roadmap" />

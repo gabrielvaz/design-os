@@ -1,17 +1,21 @@
 import { useMemo } from 'react'
+import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AppLayout } from '@/components/AppLayout'
 import { EmptyState } from '@/components/EmptyState'
 import { StepIndicator, type StepStatus } from '@/components/StepIndicator'
 import { NextPhaseButton } from '@/components/NextPhaseButton'
-import { loadProductData } from '@/lib/product-loader'
+import { loadProjectData } from '@/lib/product-loader'
 
 export function DataModelPage() {
-  const productData = useMemo(() => loadProductData(), [])
+  const { projectId } = useParams()
+  const productData = useMemo(() => loadProjectData(projectId || ''), [projectId])
   const dataModel = productData.dataModel
 
   const hasDataModel = !!dataModel
   const stepStatus: StepStatus = hasDataModel ? 'completed' : 'current'
+
+  if (!projectId) return null
 
   return (
     <AppLayout>
@@ -100,7 +104,7 @@ export function DataModelPage() {
                   <code className="font-mono text-stone-800 dark:text-stone-200">/data-model</code>{' '}
                   or edit the file directly at{' '}
                   <code className="font-mono text-stone-800 dark:text-stone-200">
-                    product/data-model/data-model.md
+                    projects/{projectId}/data-model/data-model.md
                   </code>
                 </p>
               </div>

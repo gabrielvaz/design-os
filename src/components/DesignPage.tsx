@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AppLayout } from '@/components/AppLayout'
 import { EmptyState } from '@/components/EmptyState'
 import { StepIndicator, type StepStatus } from '@/components/StepIndicator'
 import { NextPhaseButton } from '@/components/NextPhaseButton'
-import { loadProductData } from '@/lib/product-loader'
+import { loadProjectData } from '@/lib/product-loader'
 import { ChevronRight, Layout } from 'lucide-react'
 
 // Map Tailwind color names to actual color values for preview
@@ -64,7 +64,8 @@ function getDesignPageStepStatuses(
 }
 
 export function DesignPage() {
-  const productData = useMemo(() => loadProductData(), [])
+  const { projectId } = useParams()
+  const productData = useMemo(() => loadProjectData(projectId || ''), [projectId])
   const designSystem = productData.designSystem
   const shell = productData.shell
 
@@ -73,6 +74,8 @@ export function DesignPage() {
   const allStepsComplete = hasDesignSystem && hasShell
 
   const stepStatuses = getDesignPageStepStatuses(hasDesignSystem, hasShell)
+
+  if (!projectId) return null
 
   return (
     <AppLayout>
@@ -212,7 +215,7 @@ export function DesignPage() {
                 {shell.hasComponents && (
                   <div className="pt-2 border-t border-stone-100 dark:border-stone-800">
                     <Link
-                      to="/shell/design"
+                      to={`/${projectId}/shell/design`}
                       className="flex items-center justify-between gap-4 py-2 hover:text-stone-900 dark:hover:text-stone-100 transition-colors group"
                     >
                       <div className="flex items-center gap-3">

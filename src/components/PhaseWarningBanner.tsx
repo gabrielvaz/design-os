@@ -1,22 +1,23 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { AlertTriangle, X } from 'lucide-react'
-import { loadProductData } from '@/lib/product-loader'
+import { loadProjectData } from '@/lib/product-loader'
 
 /**
  * Get a storage key based on the product name to track dismissed warnings per product
  * Converts " & " to "-and-" to maintain semantic meaning
  */
-function getStorageKey(productName: string): string {
+function getStorageKey(projectId: string, productName: string): string {
   const sanitized = productName
     .toLowerCase()
     .replace(/\s+&\s+/g, '-and-') // Convert " & " to "-and-" first
     .replace(/[^a-z0-9]+/g, '-')
-  return `design-os-phase-warning-dismissed-${sanitized}`
+  return `design-os-phase-warning-dismissed-${projectId}-${sanitized}`
 }
 
 export function PhaseWarningBanner() {
-  const productData = useMemo(() => loadProductData(), [])
+  const { projectId } = useParams<{ projectId: string }>()
+  const productData = useMemo(() => loadProjectData(projectId || ''), [projectId])
   const [isDismissed, setIsDismissed] = useState(true) // Start dismissed to avoid flash
 
   const hasDataModel = !!productData.dataModel
@@ -25,31 +26,33 @@ export function PhaseWarningBanner() {
   const hasDesign = hasDesignSystem || hasShell
 
   const productName = productData.overview?.name || 'default-product'
-  const storageKey = getStorageKey(productName)
+  const storageKey = useMemo(() => projectId ? getStorageKey(projectId, productName) : '', [projectId, productName])
 
   // Check localStorage on mount
   useEffect(() => {
+    if (!storageKey) return
     const dismissed = localStorage.getItem(storageKey) === 'true'
     setIsDismissed(dismissed)
   }, [storageKey])
 
   const handleDismiss = () => {
+    if (!storageKey) return
     localStorage.setItem(storageKey, 'true')
     setIsDismissed(true)
   }
 
-  // Don't show if both phases are complete or if dismissed
-  if ((hasDataModel && hasDesign) || isDismissed) {
+  // Don't show if both phases are complete or if dismissed or if no projectId
+  if (!projectId || (hasDataModel && hasDesign) || isDismissed) {
     return null
   }
 
   // Build the warning message
   const missingPhases: { name: string; path: string }[] = []
   if (!hasDataModel) {
-    missingPhases.push({ name: 'Data Model', path: '/data-model' })
+    missingPhases.push({ name: 'Data Model', path: `/${projectId}/data-model` })
   }
   if (!hasDesign) {
-    missingPhases.push({ name: 'Design', path: '/design' })
+    missingPhases.push({ name: 'Design', path: `/${projectId}/design` })
   }
 
   return (

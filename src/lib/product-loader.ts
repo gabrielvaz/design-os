@@ -7,19 +7,54 @@ import { loadDataModel, hasDataModel } from './data-model-loader'
 import { loadDesignSystem, hasDesignSystem } from './design-system-loader'
 import { loadShellInfo, hasShell } from './shell-loader'
 
-// Load markdown files from /product/ directory at build time
-const productFiles = import.meta.glob('/product/*.md', {
+// Load markdown files from /projects/ directory at build time
+const projectFiles = import.meta.glob('/projects/**/*.md', {
   query: '?raw',
   import: 'default',
   eager: true,
 }) as Record<string, string>
 
-// Load zip files from root directory at build time
-const exportZipFiles = import.meta.glob('/product-plan.zip', {
+// Load zip files from projects directory at build time
+const exportZipFiles = import.meta.glob('/projects/**/*.zip', {
   query: '?url',
   import: 'default',
   eager: true,
 }) as Record<string, string>
+
+/**
+ * List all available projects based on directories in /projects/
+ */
+export function listProjects() {
+  const projects = new Set<string>()
+  
+  Object.keys(projectFiles).forEach(path => {
+    const match = path.match(/\/projects\/([^/]+)\//)
+    if (match?.[1]) {
+      projects.add(match[1])
+    }
+  })
+  
+  const projectList = Array.from(projects).map(id => {
+    const overviewPath = `/projects/${id}/product-overview.md`
+    const overviewMd = projectFiles[overviewPath]
+    const overview = overviewMd ? parseProductOverview(overviewMd) : null
+    
+    return {
+      id,
+      name: overview?.name || id,
+      description: overview?.description || ''
+    }
+  })
+
+  // Ensure "bible-notes" is first if it exists
+  projectList.sort((a, b) => {
+    if (a.id === 'bible-notes') return -1
+    if (b.id === 'bible-notes') return 1
+    return a.id.localeCompare(b.id)
+  })
+
+  return projectList
+}
 
 /**
  * Slugify a string for use as an ID
@@ -35,21 +70,6 @@ function slugify(str: string): string {
 
 /**
  * Parse product-overview.md content into ProductOverview structure
- *
- * Expected format:
- * # [Product Name]
- *
- * ## Description
- * [1-3 sentence product description]
- *
- * ## Problems & Solutions
- *
- * ### Problem 1: [Problem Title]
- * [How the product solves it]
- *
- * ## Key Features
- * - Feature 1
- * - Feature 2
  */
 export function parseProductOverview(md: string): ProductOverview | null {
   if (!md || !md.trim()) return null
@@ -104,17 +124,6 @@ export function parseProductOverview(md: string): ProductOverview | null {
 
 /**
  * Parse product-roadmap.md content into ProductRoadmap structure
- *
- * Expected format:
- * # Product Roadmap
- *
- * ## Sections
- *
- * ### 1. [Section Title]
- * [One sentence description]
- *
- * ### 2. [Section Title]
- * [One sentence description]
  */
 export function parseProductRoadmap(md: string): ProductRoadmap | null {
   if (!md || !md.trim()) return null
@@ -152,48 +161,75 @@ export function parseProductRoadmap(md: string): ProductRoadmap | null {
 }
 
 /**
- * Load all product data from markdown files and other sources
+ * Load all project data from markdown files and other sources
  */
-export function loadProductData(): ProductData {
-  const overviewContent = productFiles['/product/product-overview.md']
-  const roadmapContent = productFiles['/product/product-roadmap.md']
+export function loadProjectData(projectId: string): ProductData {
+  const overviewPath = `/projects/${projectId}/product-overview.md`
+  const roadmapPath = `/projects/${projectId}/product-roadmap.md`
+  
+  const overviewContent = projectFiles[overviewPath]
+  const roadmapContent = projectFiles[roadmapPath]
 
   return {
     overview: overviewContent ? parseProductOverview(overviewContent) : null,
     roadmap: roadmapContent ? parseProductRoadmap(roadmapContent) : null,
-    dataModel: loadDataModel(),
-    designSystem: loadDesignSystem(),
-    shell: loadShellInfo(),
+    dataModel: loadDataModel(projectId),
+    designSystem: loadDesignSystem(projectId),
+    shell: loadShellInfo(projectId),
   }
 }
 
 /**
  * Check if product overview has been defined
  */
-export function hasProductOverview(): boolean {
-  return '/product/product-overview.md' in productFiles
+export function hasProductOverview(projectId: string): boolean {
+  return `/projects/${projectId}/product-overview.md` in projectFiles
 }
 
 /**
  * Check if product roadmap has been defined
  */
-export function hasProductRoadmap(): boolean {
-  return '/product/product-roadmap.md' in productFiles
+export function hasProductRoadmap(projectId: string): boolean {
+  return `/projects/${projectId}/product-roadmap.md` in projectFiles
 }
 
 /**
  * Check if export zip file exists
  */
-export function hasExportZip(): boolean {
-  return '/product-plan.zip' in exportZipFiles
+export function hasExportZip(projectId: string): boolean {
+  return `/projects/${projectId}/product-plan.zip` in exportZipFiles
 }
 
 /**
  * Get the URL of the export zip file (if it exists)
  */
-export function getExportZipUrl(): string | null {
-  return exportZipFiles['/product-plan.zip'] || null
+export function getExportZipUrl(projectId: string): string | null {
+  return exportZipFiles[`/projects/${projectId}/product-plan.zip`] || null
 }
+
+/**
+ * Get all files for a project (for individual downloads)
+ */
+export function getProjectFiles(projectId: string) {
+  const files: { path: string; name: string }[] = []
+  const prefix = `/projects/${projectId}/`
+  
+  Object.keys(projectFiles).forEach(path => {
+    if (path.startsWith(prefix)) {
+      files.push({
+        path,
+        name: path.replace(prefix, '')
+      })
+    }
+  })
+
+  return files
+}
+
+/**
+ * Legacy alias for loadProjectData
+ */
+export const loadProductData = loadProjectData
 
 // Re-export utility functions for checking individual pieces
 export { hasDataModel, hasDesignSystem, hasShell }

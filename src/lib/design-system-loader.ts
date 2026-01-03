@@ -4,23 +4,16 @@
 
 import type { DesignSystem, ColorTokens, TypographyTokens } from '@/types/product'
 
-// Load JSON files from product/design-system at build time
-const designSystemFiles = import.meta.glob('/product/design-system/*.json', {
+// Load JSON files from projects/*/design-system at build time
+const designSystemFiles = import.meta.glob('/projects/*/design-system/*.json', {
   eager: true,
 }) as Record<string, { default: Record<string, string> }>
 
 /**
  * Load color tokens from colors.json
- *
- * Expected format:
- * {
- *   "primary": "lime",
- *   "secondary": "teal",
- *   "neutral": "stone"
- * }
  */
-export function loadColorTokens(): ColorTokens | null {
-  const colorsModule = designSystemFiles['/product/design-system/colors.json']
+export function loadColorTokens(projectId: string): ColorTokens | null {
+  const colorsModule = designSystemFiles[`/projects/${projectId}/design-system/colors.json`]
   if (!colorsModule?.default) return null
 
   const colors = colorsModule.default
@@ -37,16 +30,9 @@ export function loadColorTokens(): ColorTokens | null {
 
 /**
  * Load typography tokens from typography.json
- *
- * Expected format:
- * {
- *   "heading": "DM Sans",
- *   "body": "DM Sans",
- *   "mono": "IBM Plex Mono"
- * }
  */
-export function loadTypographyTokens(): TypographyTokens | null {
-  const typographyModule = designSystemFiles['/product/design-system/typography.json']
+export function loadTypographyTokens(projectId: string): TypographyTokens | null {
+  const typographyModule = designSystemFiles[`/projects/${projectId}/design-system/typography.json`]
   if (!typographyModule?.default) return null
 
   const typography = typographyModule.default
@@ -64,9 +50,9 @@ export function loadTypographyTokens(): TypographyTokens | null {
 /**
  * Load the complete design system
  */
-export function loadDesignSystem(): DesignSystem | null {
-  const colors = loadColorTokens()
-  const typography = loadTypographyTokens()
+export function loadDesignSystem(projectId: string): DesignSystem | null {
+  const colors = loadColorTokens(projectId)
+  const typography = loadTypographyTokens(projectId)
 
   // Return null if neither colors nor typography are defined
   if (!colors && !typography) {
@@ -79,23 +65,23 @@ export function loadDesignSystem(): DesignSystem | null {
 /**
  * Check if design system has been defined (at least colors or typography)
  */
-export function hasDesignSystem(): boolean {
+export function hasDesignSystem(projectId: string): boolean {
   return (
-    '/product/design-system/colors.json' in designSystemFiles ||
-    '/product/design-system/typography.json' in designSystemFiles
+    `/projects/${projectId}/design-system/colors.json` in designSystemFiles ||
+    `/projects/${projectId}/design-system/typography.json` in designSystemFiles
   )
 }
 
 /**
  * Check if colors have been defined
  */
-export function hasColors(): boolean {
-  return '/product/design-system/colors.json' in designSystemFiles
+export function hasColors(projectId: string): boolean {
+  return `/projects/${projectId}/design-system/colors.json` in designSystemFiles
 }
 
 /**
  * Check if typography has been defined
  */
-export function hasTypography(): boolean {
-  return '/product/design-system/typography.json' in designSystemFiles
+export function hasTypography(projectId: string): boolean {
+  return `/projects/${projectId}/design-system/typography.json` in designSystemFiles
 }

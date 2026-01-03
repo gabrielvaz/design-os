@@ -6,10 +6,11 @@ import type { ScreenDesignInfo } from '@/types/section'
 
 interface ScreenDesignsCardProps {
   screenDesigns: ScreenDesignInfo[]
+  projectId: string
   sectionId: string
 }
 
-export function ScreenDesignsCard({ screenDesigns, sectionId }: ScreenDesignsCardProps) {
+export function ScreenDesignsCard({ screenDesigns, projectId, sectionId }: ScreenDesignsCardProps) {
   // Empty state
   if (screenDesigns.length === 0) {
     return <EmptyState type="screen-designs" />
@@ -27,7 +28,7 @@ export function ScreenDesignsCard({ screenDesigns, sectionId }: ScreenDesignsCar
           {screenDesigns.map((screenDesign) => (
             <li key={screenDesign.name}>
               <Link
-                to={`/sections/${sectionId}/screen-designs/${screenDesign.name}`}
+                to={`/${projectId}/sections/${sectionId}/screen-designs/${screenDesign.name}`}
                 className="flex items-center justify-between gap-4 px-6 py-4 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors"
               >
                 <div className="flex items-center gap-3 min-w-0">

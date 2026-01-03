@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Layers, ArrowLeft } from 'lucide-react'
+import { useNavigate, useParams, Link } from 'react-router-dom'
+import { Layers, ArrowLeft, BookOpen } from 'lucide-react'
 import { PhaseNav } from './PhaseNav'
 import { ThemeToggle } from './ThemeToggle'
 import { Button } from '@/components/ui/button'
@@ -25,12 +25,13 @@ export function AppLayout({
   showPhaseNav = true,
 }: AppLayoutProps) {
   const navigate = useNavigate()
+  const { projectId } = useParams()
 
   // Determine if this is a sub-page (has back navigation)
   const isSubPage = !!backTo
 
   return (
-    <div className="min-h-screen bg-background animate-fade-in flex flex-col">
+    <div className="min-h-screen bg-background animate-fade-in flex flex-col font-sans">
       {/* Header */}
       <header className="border-b border-stone-200 dark:border-stone-800 bg-card/80 backdrop-blur-sm sticky top-0 z-20">
         <div className="px-4 sm:px-6 py-3">
@@ -61,9 +62,17 @@ export function AppLayout({
           ) : (
             /* Main page header with phase nav - full width */
             <div className="flex items-center justify-between gap-4">
-              {/* Theme Toggle on left for balance */}
-              <div className="w-10 shrink-0">
-                {/* Empty spacer for balance */}
+              {/* Home Link */}
+              <div className="shrink-0">
+                <Link 
+                  to="/" 
+                  className="flex items-center gap-2 text-stone-900 dark:text-stone-100 font-bold text-sm hover:opacity-80 transition-opacity"
+                >
+                  <div className="bg-stone-900 dark:bg-stone-100 p-1.5 rounded-lg">
+                    <BookOpen className="w-4 h-4 text-stone-100 dark:text-stone-900" />
+                  </div>
+                  <span className="hidden lg:inline">Design OS</span>
+                </Link>
               </div>
 
               {/* Phase Navigation - centered */}

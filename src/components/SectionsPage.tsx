@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AppLayout } from '@/components/AppLayout'
 import { EmptyState } from '@/components/EmptyState'
 import { PhaseWarningBanner } from '@/components/PhaseWarningBanner'
 import { NextPhaseButton } from '@/components/NextPhaseButton'
-import { loadProductData } from '@/lib/product-loader'
+import { loadProjectData } from '@/lib/product-loader'
 import { getSectionScreenDesigns, getSectionScreenshots, hasSectionSpec, hasSectionData } from '@/lib/section-loader'
 import { ChevronRight, Check, Circle } from 'lucide-react'
 
@@ -18,12 +18,12 @@ interface SectionProgress {
   screenshotCount: number
 }
 
-function getSectionProgress(sectionId: string): SectionProgress {
+function getSectionProgress(projectId: string, sectionId: string): SectionProgress {
   const screenDesigns = getSectionScreenDesigns(sectionId)
-  const screenshots = getSectionScreenshots(sectionId)
+  const screenshots = getSectionScreenshots(projectId, sectionId)
   return {
-    hasSpec: hasSectionSpec(sectionId),
-    hasData: hasSectionData(sectionId),
+    hasSpec: hasSectionSpec(projectId, sectionId),
+    hasData: hasSectionData(projectId, sectionId),
     hasScreenDesigns: screenDesigns.length > 0,
     screenDesignCount: screenDesigns.length,
     hasScreenshots: screenshots.length > 0,
@@ -33,7 +33,8 @@ function getSectionProgress(sectionId: string): SectionProgress {
 
 export function SectionsPage() {
   const navigate = useNavigate()
-  const productData = useMemo(() => loadProductData(), [])
+  const { projectId } = useParams()
+  const productData = useMemo(() => loadProjectData(projectId || ''), [projectId])
 
   const sections = productData.roadmap?.sections || []
 
@@ -41,16 +42,20 @@ export function SectionsPage() {
   const sectionProgressMap = useMemo(() => {
     const map: Record<string, SectionProgress> = {}
     for (const section of sections) {
-      map[section.id] = getSectionProgress(section.id)
+      if (projectId) {
+        map[section.id] = getSectionProgress(projectId, section.id)
+      }
     }
     return map
-  }, [sections])
+  }, [sections, projectId])
 
   // Count completed sections (those with spec, data, AND screen designs)
   const completedSections = sections.filter(s => {
     const p = sectionProgressMap[s.id]
     return p?.hasSpec && p?.hasData && p?.hasScreenDesigns
   }).length
+
+  if (!projectId) return null
 
   return (
     <AppLayout>
@@ -92,7 +97,7 @@ export function SectionsPage() {
                   return (
                     <li key={section.id}>
                       <button
-                        onClick={() => navigate(`/sections/${section.id}`)}
+                        onClick={() => navigate(`/${projectId}/sections/${section.id}`)}
                         className="w-full px-6 py-4 flex items-center justify-between gap-4 text-left hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors"
                       >
                         <div className="flex items-start gap-4 min-w-0">

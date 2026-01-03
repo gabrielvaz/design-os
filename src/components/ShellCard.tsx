@@ -6,10 +6,11 @@ import { ChevronDown, ChevronRight, PanelLeft, Layout } from 'lucide-react'
 import type { ShellInfo } from '@/types/product'
 
 interface ShellCardProps {
+  projectId: string
   shell: ShellInfo
 }
 
-export function ShellCard({ shell }: ShellCardProps) {
+export function ShellCard({ projectId, shell }: ShellCardProps) {
   const [navigationOpen, setNavigationOpen] = useState(false)
 
   return (
@@ -64,7 +65,7 @@ export function ShellCard({ shell }: ShellCardProps) {
         {shell.hasComponents && (
           <div className="pt-2 border-t border-stone-100 dark:border-stone-800">
             <Link
-              to="/shell/design"
+              to={`/${projectId}/shell/design`}
               className="flex items-center justify-between gap-4 py-2 hover:text-stone-900 dark:hover:text-stone-100 transition-colors group"
             >
               <div className="flex items-center gap-3">

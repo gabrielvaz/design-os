@@ -1,4 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom'
+import { HomePage } from '@/components/HomePage'
 import { ProductPage } from '@/components/ProductPage'
 import { DataModelPage } from '@/components/DataModelPage'
 import { DesignPage } from '@/components/DesignPage'
@@ -11,42 +12,46 @@ import { ExportPage } from '@/components/ExportPage'
 export const router = createBrowserRouter([
   {
     path: '/',
+    element: <HomePage />,
+  },
+  {
+    path: '/:projectId',
     element: <ProductPage />,
   },
   {
-    path: '/data-model',
+    path: '/:projectId/data-model',
     element: <DataModelPage />,
   },
   {
-    path: '/design',
+    path: '/:projectId/design',
     element: <DesignPage />,
   },
   {
-    path: '/sections',
+    path: '/:projectId/sections',
     element: <SectionsPage />,
   },
   {
-    path: '/sections/:sectionId',
+    path: '/:projectId/sections/:sectionId',
     element: <SectionPage />,
   },
   {
-    path: '/sections/:sectionId/screen-designs/:screenDesignName',
+    path: '/:projectId/sections/:sectionId/screen-designs/:screenDesignName',
     element: <ScreenDesignPage />,
   },
   {
-    path: '/sections/:sectionId/screen-designs/:screenDesignName/fullscreen',
+    path: '/:projectId/sections/:sectionId/screen-designs/:screenDesignName/fullscreen',
     element: <ScreenDesignFullscreen />,
   },
   {
-    path: '/shell/design',
+    path: '/:projectId/shell/design',
     element: <ShellDesignPage />,
   },
   {
-    path: '/shell/design/fullscreen',
+    path: '/:projectId/shell/design/fullscreen',
     element: <ShellDesignFullscreen />,
   },
   {
-    path: '/export',
+    path: '/:projectId/export',
     element: <ExportPage />,
   },
 ])

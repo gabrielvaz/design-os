@@ -6,7 +6,7 @@ import type { ShellSpec, ShellInfo } from '@/types/product'
 import type { ComponentType, ReactNode } from 'react'
 
 // Load shell spec markdown file at build time
-const shellSpecFiles = import.meta.glob('/product/shell/*.md', {
+const shellSpecFiles = import.meta.glob('/projects/*/shell/*.md', {
   query: '?raw',
   import: 'default',
   eager: true,
@@ -133,8 +133,8 @@ export function loadShellPreview(): (() => Promise<{ default: ComponentType }>) 
 /**
  * Load the complete shell info
  */
-export function loadShellInfo(): ShellInfo | null {
-  const specContent = shellSpecFiles['/product/shell/spec.md']
+export function loadShellInfo(projectId: string): ShellInfo | null {
+  const specContent = shellSpecFiles[`/projects/${projectId}/shell/spec.md`]
   const spec = specContent ? parseShellSpec(specContent) : null
   const hasComponents = hasShellComponents()
 
@@ -149,15 +149,15 @@ export function loadShellInfo(): ShellInfo | null {
 /**
  * Check if shell has been defined (spec or components)
  */
-export function hasShell(): boolean {
-  return hasShellSpec() || hasShellComponents()
+export function hasShell(projectId: string): boolean {
+  return hasShellSpec(projectId) || hasShellComponents()
 }
 
 /**
  * Check if shell spec has been defined
  */
-export function hasShellSpec(): boolean {
-  return '/product/shell/spec.md' in shellSpecFiles
+export function hasShellSpec(projectId: string): boolean {
+  return `/projects/${projectId}/shell/spec.md` in shellSpecFiles
 }
 
 /**
