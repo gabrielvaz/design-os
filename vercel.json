@@ -1,8 +1,21 @@
 {
+  "cleanUrls": true,
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/projects",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/projects/(.*)",
+      "destination": "/$1",
+      "permanent": true
     }
   ]
 }
